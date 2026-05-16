@@ -12,40 +12,41 @@ public class ApplicationDB {
 
 	public Connection getConnection(){
 		
-		//Create a connection string
-		String connectionUrl = "jdbc:mysql://localhost:3306/cs336project";
-		Connection connection = null;
+		String connectionUrl = getEnvOrDefault("DB_URL", "jdbc:mysql://localhost:3306/cs336project?useSSL=false");
+		String databaseUser = getEnvOrDefault("DB_USER", "root");
+		String databasePassword = getEnvOrDefault("DB_PASSWORD", "");
 		
 		try {
-			//Load JDBC driver - the interface standardizing the connection procedure. Look at WEB-INF\lib for a mysql connector jar file, otherwise it fails.
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			loadJdbcDriver();
+			return DriverManager.getConnection(connectionUrl, databaseUser, databasePassword);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			//Create a connection to your DB
-			connection = DriverManager.getConnection(connectionUrl,"root", "Hasnain123");
+			throw new IllegalStateException("MySQL JDBC driver was not found. Add the connector JAR to WEB-INF/lib.", e);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new IllegalStateException("Could not connect to the airline reservation database.", e);
 		}
 		
-		return connection;
-		
+	}
+
+	private void loadJdbcDriver() throws ClassNotFoundException {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			Class.forName("com.mysql.jdbc.Driver");
+		}
+	}
+
+	private String getEnvOrDefault(String key, String defaultValue) {
+		String value = System.getenv(key);
+		return value == null || value.trim().isEmpty() ? defaultValue : value;
 	}
 	
 	public void closeConnection(Connection connection){
+		if (connection == null) {
+			return;
+		}
 		try {
 			connection.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
