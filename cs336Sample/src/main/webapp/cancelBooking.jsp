@@ -1,4 +1,4 @@
-<%@ page import="java.sql.*,javax.servlet.http.*" contentType="text/html; charset=UTF-8" %>
+<%@ page import="java.sql.*,javax.servlet.http.*,com.cs336.pkg.ApplicationDB" contentType="text/html; charset=UTF-8" %>
 <%
   HttpSession session = request.getSession(false);
   if (session == null || session.getAttribute("userEmail") == null) {
@@ -12,13 +12,8 @@
     return;
   }
 
-  // DB params
-  String url    = application.getInitParameter("dbUrl");
-  String dbUser = application.getInitParameter("dbUser");
-  String dbPass = application.getInitParameter("dbPass");
-  Class.forName("com.mysql.cj.jdbc.Driver");
-
-  try (Connection conn = DriverManager.getConnection(url, dbUser, dbPass)) {
+  ApplicationDB db = new ApplicationDB();
+  try (Connection conn = db.getConnection()) {
     // verify ticket belongs to user and is cancellable
     PreparedStatement ps = conn.prepareStatement(
       "SELECT t.cancellable " +
