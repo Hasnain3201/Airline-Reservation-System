@@ -60,13 +60,11 @@
         }
 
         if (!valid) {
-            out.println("<p style='color:red;'>Invalid email or password. Please try again.</p>");
-            out.println("<a href='login.jsp'>Return to Login</a>");
+            response.sendRedirect("login.jsp?error=1");
         }
 
     } catch (Exception e) {
-        out.println("<p style='color:red;'>An error occurred while processing your login.</p>");
-       
+        response.sendRedirect("login.jsp?error=2");
     } finally {
         if (rs != null) try { rs.close(); } catch (SQLException e) {}
         if (ps != null) try { ps.close(); } catch (SQLException e) {}

@@ -1,6 +1,5 @@
-<%@ page import="java.sql.*,javax.servlet.http.*,com.cs336.pkg.ApplicationDB" contentType="text/html; charset=UTF-8" %>
+<%@ page import="java.sql.*,javax.servlet.http.*,com.cs336.pkg.ApplicationDB" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
-  HttpSession session = request.getSession(false);
   if (session == null || session.getAttribute("userEmail") == null) {
     response.sendRedirect("login.jsp");
     return;
@@ -12,6 +11,7 @@
     return;
   }
 
+  String outcome;
   ApplicationDB db = new ApplicationDB();
   try (Connection conn = db.getConnection()) {
     // verify ticket belongs to user and is cancellable
@@ -31,15 +31,43 @@
         del.setInt(1, Integer.parseInt(ticketID));
         del.executeUpdate();
         del.close();
-        out.println("<h3>Your reservation has been cancelled.</h3>");
+        outcome = "cancelled";
       } else {
-        out.println("<h3>This reservation cannot be cancelled.</h3>");
+        outcome = "locked";
       }
     }
     ps.close();
   } catch (Exception e) {
     e.printStackTrace();
-    out.println("<h3>Error cancelling reservation.</h3>");
+    outcome = "error";
   }
 %>
-<p><a href="viewReservations.jsp">← Back to Reservations</a></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<jsp:include page="/WEB-INF/jspf/head.jsp"><jsp:param name="title" value="Cancel reservation"/></jsp:include>
+</head>
+<body>
+<jsp:include page="/WEB-INF/jspf/nav.jsp"><jsp:param name="role" value="customer"/><jsp:param name="active" value="trips"/></jsp:include>
+
+<main class="shell">
+  <section class="result-hero">
+<% if ("cancelled".equals(outcome)) { %>
+    <div class="stamp is-round stamp-in">Cancelled<small>Refund issued</small></div>
+    <h1>Your reservation has been <em>cancelled.</em></h1>
+<% } else if ("locked".equals(outcome)) { %>
+    <div class="stamp is-stamp is-round stamp-in">Locked<small>Non-refundable</small></div>
+    <h1>This reservation cannot be <em>cancelled.</em></h1>
+<% } else { %>
+    <div class="stamp is-stamp is-round stamp-in">Error<small>Try again</small></div>
+    <h1>Error cancelling <em>reservation.</em></h1>
+<% } %>
+    <div class="btn-row">
+      <a class="btn" href="viewReservations.jsp"><svg class="ico"><use href="#i-back"/></svg> Back to my trips</a>
+    </div>
+  </section>
+</main>
+
+<jsp:include page="/WEB-INF/jspf/foot.jsp"/>
+</body>
+</html>
