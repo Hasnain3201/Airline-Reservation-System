@@ -82,8 +82,8 @@
     }
 
     boolean seatsAvailable = takenSeats.size() < maxSeats;
-    int perSide = maxSeats <= 16 ? 2 : 3;
-    int perRow = perSide * 2;
+    String seatModel = model;
+    String seatFormId = null;
     int openSeats = 0;
     for (int i = 1; i <= maxSeats; i++) if (!takenSeats.contains(Integer.toString(i))) openSeats++;
 %>
@@ -201,41 +201,7 @@
       </div>
 
       <aside class="reveal reveal-3" style="position:sticky; top:100px">
-        <div class="fuselage">
-          <div class="cabin-label"><span class="caps">Cabin map &middot; <%= esc(model) %></span></div>
-<% if (seatsAvailable) { %>
-          <div class="seat-grid" style="--l:<%= perSide %>; --r:<%= perSide %>">
-<%   for (int start = 1, row = 1; start <= maxSeats; start += perRow, row++) { %>
-            <div class="row">
-<%     for (int k = 0; k < perRow; k++) {
-         int n = start + k;
-         if (k == perSide) { %>
-              <span class="aisle-no"><%= row %></span>
-<%       }
-         if (n > maxSeats) { %>
-              <span></span>
-<%         continue;
-         }
-         String sn = Integer.toString(n);
-         boolean taken = takenSeats.contains(sn); %>
-              <span class="seat">
-                <input type="radio" name="seatNumber" id="seat<%= sn %>" value="<%= sn %>" required <%= taken ? "disabled" : "" %>>
-                <label for="seat<%= sn %>" title="Seat <%= sn %><%= taken ? " (taken)" : "" %>"><%= sn %></label>
-              </span>
-<%     } %>
-            </div>
-<%   } %>
-          </div>
-          <div class="seat-legend">
-            <span><i></i>Open</span><span><i class="taken"></i>Taken</span><span><i class="mine"></i>Yours</span>
-          </div>
-<% } else { %>
-          <div class="empty" style="border:0; background:transparent; padding:20px 0">
-            <div class="stamp is-stamp is-round">Sold<small>out</small></div>
-            <p style="margin-top:16px">All <%= maxSeats %> seats are booked.</p>
-          </div>
-<% } %>
-        </div>
+<%@ include file="/WEB-INF/jspf/seatmap.jspf" %>
       </aside>
     </div>
   </form>

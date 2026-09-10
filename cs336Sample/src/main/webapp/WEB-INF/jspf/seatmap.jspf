@@ -1,0 +1,41 @@
+<%-- Expects page variables: int maxSeats, java.util.Set<String> takenSeats, String seatModel, String seatFormId (nullable) --%>
+<%
+  int smPerSide = maxSeats <= 16 ? 2 : 3;
+  int smPerRow = smPerSide * 2;
+  boolean smAnyOpen = takenSeats.size() < maxSeats;
+%>
+        <div class="fuselage">
+          <div class="cabin-label"><span class="caps">Cabin map<%= seatModel != null ? " &middot; " + esc(seatModel) : "" %></span></div>
+<% if (smAnyOpen) { %>
+          <div class="seat-grid" style="--l:<%= smPerSide %>; --r:<%= smPerSide %>">
+<%   for (int smStart = 1, smRow = 1; smStart <= maxSeats; smStart += smPerRow, smRow++) { %>
+            <div class="row">
+<%     for (int k = 0; k < smPerRow; k++) {
+         int n = smStart + k;
+         if (k == smPerSide) { %>
+              <span class="aisle-no"><%= smRow %></span>
+<%       }
+         if (n > maxSeats) { %>
+              <span></span>
+<%         continue;
+         }
+         String sn = Integer.toString(n);
+         boolean taken = takenSeats.contains(sn); %>
+              <span class="seat">
+                <input type="radio" name="seatNumber" id="seat<%= sn %>" value="<%= sn %>" required <%= taken ? "disabled" : "" %><%= seatFormId != null ? " form=\"" + seatFormId + "\"" : "" %>>
+                <label for="seat<%= sn %>" title="Seat <%= sn %><%= taken ? " (taken)" : "" %>"><%= sn %></label>
+              </span>
+<%     } %>
+            </div>
+<%   } %>
+          </div>
+          <div class="seat-legend">
+            <span><i></i>Open</span><span><i class="taken"></i>Taken</span><span><i class="mine"></i>Selected</span>
+          </div>
+<% } else { %>
+          <div class="empty" style="border:0; background:transparent; padding:20px 0">
+            <div class="stamp is-stamp is-round">Sold<small>out</small></div>
+            <p style="margin-top:16px">All <%= maxSeats %> seats are booked.</p>
+          </div>
+<% } %>
+        </div>
