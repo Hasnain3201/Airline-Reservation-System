@@ -426,7 +426,4 @@ A typical page looks like this:
 
 **Hasnain Shahzad**
 
-- GitHub: [Hasnain3201](https://github.com/Hasnain3201)
-- LinkedIn: [hasnain-shahzad-cs3201](https://www.linkedin.com/in/hasnain-shahzad-cs3201/)
-
 <p align="center"><sub>Please keep your belongings with you at all times.</sub></p>
