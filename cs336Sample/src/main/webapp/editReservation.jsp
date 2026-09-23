@@ -1,5 +1,6 @@
 <%@ page import="java.sql.*, java.util.*, com.cs336.pkg.ApplicationDB" %>
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/jspf/util.jspf" %>
 
 <%
   HttpSession s = request.getSession(false);
@@ -46,31 +47,28 @@
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Edit Reservations</title>
-  <style>
-    body { font-family: sans-serif; margin: 2em; }
-    table { border-collapse: collapse; width: 100%; margin-top: 1em; }
-    th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
-    .topbar { text-align: right; margin-bottom: 1em; }
-    .topbar a { margin-left: 1em; }
-  </style>
+<jsp:include page="/WEB-INF/jspf/head.jsp"><jsp:param name="title" value="Amend reservations"/></jsp:include>
 </head>
 <body>
-<div class="topbar">
-  Logged in as <strong><%= email %></strong> |
-  <a href="repHome.jsp">🏠 Rep Home</a> |
-  <a href="logout.jsp">Logout</a>
-</div>
+<jsp:include page="/WEB-INF/jspf/nav.jsp"><jsp:param name="role" value="rep"/><jsp:param name="active" value="edit"/></jsp:include>
 
-<h2>Edit Reservations</h2>
+<main class="shell">
+  <header class="page-head reveal">
+    <div>
+      <div class="eyebrow"><span class="gate-sign">B4</span> Concourse B &middot; Amendments</div>
+      <h1>Amend a <em>reservation.</em></h1>
+      <p class="lede">Pull up a customer's flight strips, then move them to a new seat, change cabin, or strike a ticket from the manifest.</p>
+    </div>
+  </header>
 
-<form method="get">
-  <label>Select Customer:</label>
-  <select name="cid" onchange="this.form.submit()">
-    <option value="">-- Select --</option>
+  <form method="get" class="card reveal reveal-2" style="margin-bottom:28px">
+    <div class="fields" style="grid-template-columns: minmax(0, 420px) 1fr; align-items:end">
+      <div class="field">
+        <label for="cid">Customer</label>
+        <select name="cid" id="cid" onchange="this.form.submit()">
+          <option value="">Select a customer&hellip;</option>
 <%
   try (Connection conn = db.getConnection();
        Statement stmt = conn.createStatement();
@@ -78,43 +76,49 @@
     while (rs.next()) {
       String cid = rs.getString("cid");
 %>
-    <option value="<%= cid %>" <%= cid.equals(selectedCID) ? "selected" : "" %>>
-      <%= rs.getString("fname") %> <%= rs.getString("lname") %>
-    </option>
+          <option value="<%= cid %>" <%= cid.equals(selectedCID) ? "selected" : "" %>><%= esc(rs.getString("fname")) %> <%= esc(rs.getString("lname")) %></option>
 <%
     }
   }
 %>
-  </select>
-</form>
+        </select>
+      </div>
+      <span class="muted tiny">Fares are re-priced automatically: Economy $100, Business $400, First $700.</span>
+    </div>
+  </form>
 
 <%
 if (selectedCID != null && !selectedCID.isEmpty()) {
   try (Connection conn = db.getConnection();
        PreparedStatement ps = conn.prepareStatement(
          "SELECT t.ticketID, t.flightID, t.class, t.seatNumber, f.flightNum, t.passengerID, " +
-         "p.fname, p.lname, ap1.city AS depCity, ap2.city AS arrCity, f.departureTime, f.arrivalTime, a.seatCapacity " +
+         "p.fname, p.lname, ap1.city AS depCity, ap2.city AS arrCity, f.departureTime, f.arrivalTime, a.seatCapacity, " +
+         "ap1.airportID AS depCode, ap2.airportID AS arrCode, f.airlineID " +
          "FROM TICKET t " +
          "JOIN FLIGHT f ON t.flightID = f.flightID " +
          "JOIN AIRCRAFT a ON f.aircraftID = a.aircraftID " +
          "JOIN PASSENGER p ON t.passengerID = p.passengerID " +
          "JOIN AIRPORT ap1 ON f.DepartureAirportID = ap1.airportID " +
          "JOIN AIRPORT ap2 ON f.ArrivalAirportID = ap2.airportID " +
-         "WHERE t.cid = ?"
+         "WHERE t.cid = ? ORDER BY f.departureTime"
        )) {
     ps.setInt(1, Integer.parseInt(selectedCID));
     ResultSet rs = ps.executeQuery();
 %>
-<table>
-  <tr>
-    <th>Ticket ID</th><th>Flight #</th><th>Passenger</th><th>From</th><th>To</th>
-    <th>Departs</th><th>Arrives</th><th>Class</th><th>Seat</th><th>Update</th><th>Delete</th>
-  </tr>
+  <div class="section-title reveal reveal-3">
+    <h2>Flight <em>strips</em></h2>
+    <span class="caps">Customer #<%= esc(selectedCID) %></span>
+  </div>
+  <div class="strips reveal reveal-3">
 <%
+    boolean any = false;
     while (rs.next()) {
+      any = true;
       int ticketID = rs.getInt("ticketID");
       int flightID = rs.getInt("flightID");
       int seatCap = rs.getInt("seatCapacity");
+      String cls = rs.getString("class");
+      String currentSeat = rs.getString("seatNumber");
 
       Set<String> takenSeats = new HashSet<>();
       try (PreparedStatement ps2 = conn.prepareStatement("SELECT seatNumber FROM TICKET WHERE flightID = ?")) {
@@ -123,55 +127,66 @@ if (selectedCID != null && !selectedCID.isEmpty()) {
         while (rs2.next()) takenSeats.add(rs2.getString("seatNumber"));
       }
 %>
-  <tr>
-    <form method="post">
-      <input type="hidden" name="cid" value="<%= selectedCID %>"/>
+    <form method="post" class="strip <%= "First".equals(cls) ? "is-ink" : "Business".equals(cls) ? "" : "is-sand" %>" style="--cols:5">
+      <input type="hidden" name="cid" value="<%= esc(selectedCID) %>"/>
       <input type="hidden" name="ticketID" value="<%= ticketID %>"/>
-      <td><%= ticketID %></td>
-      <td><%= rs.getString("flightNum") %></td>
-      <td><%= rs.getString("fname") %> <%= rs.getString("lname") %></td>
-      <td><%= rs.getString("depCity") %></td>
-      <td><%= rs.getString("arrCity") %></td>
-      <td><%= rs.getTimestamp("departureTime") %></td>
-      <td><%= rs.getTimestamp("arrivalTime") %></td>
-      <td>
-        <select name="ticketClass">
-          <option<%= rs.getString("class").equals("Economy") ? " selected" : "" %>>Economy</option>
-          <option<%= rs.getString("class").equals("Business") ? " selected" : "" %>>Business</option>
-          <option<%= rs.getString("class").equals("First") ? " selected" : "" %>>First</option>
+      <div class="strip-tab">#<%= ticketID %></div>
+      <div><span class="k"><%= esc(rs.getString("airlineID")) %> <%= esc(rs.getString("flightNum")) %></span><span class="v big"><%= esc(rs.getString("depCode")) %> &rarr; <%= esc(rs.getString("arrCode")) %></span></div>
+      <div><span class="k">Passenger</span><span class="v"><%= esc(rs.getString("fname")) %> <%= esc(rs.getString("lname")) %></span></div>
+      <div><span class="k">Departs</span><span class="v"><%= fmtDate(rs.getTimestamp("departureTime")) %> <%= fmtTime(rs.getTimestamp("departureTime")) %></span></div>
+      <div>
+        <span class="k">Class</span>
+        <select name="ticketClass" aria-label="Class">
+          <option<%= "Economy".equals(cls) ? " selected" : "" %>>Economy</option>
+          <option<%= "Business".equals(cls) ? " selected" : "" %>>Business</option>
+          <option<%= "First".equals(cls) ? " selected" : "" %>>First</option>
         </select>
-      </td>
-      <td>
-        <select name="seatNumber">
+      </div>
+      <div>
+        <span class="k">Seat</span>
+        <select name="seatNumber" aria-label="Seat">
 <%
       for (int i = 1; i <= seatCap; i++) {
         String sn = Integer.toString(i);
-        boolean taken = takenSeats.contains(sn) && !sn.equals(rs.getString("seatNumber"));
+        boolean taken = takenSeats.contains(sn) && !sn.equals(currentSeat);
 %>
-          <option value="<%= sn %>" <%= sn.equals(rs.getString("seatNumber")) ? "selected" : "" %> <%= taken ? "disabled" : "" %>>
-            <%= sn %> <%= taken ? "(Taken)" : "" %>
-          </option>
+          <option value="<%= sn %>" <%= sn.equals(currentSeat) ? "selected" : "" %> <%= taken ? "disabled" : "" %>><%= sn %><%= taken ? " (taken)" : "" %></option>
 <%
       }
 %>
         </select>
-      </td>
-      <td>
-        <button type="submit" name="action" value="update">Update</button>
-      </td>
-      <td>
-        <button type="submit" name="action" value="delete">Delete</button>
-      </td>
+      </div>
+      <div class="strip-act">
+        <button type="submit" name="action" value="update" class="btn btn-sm"><svg class="ico"><use href="#i-check"/></svg> Update</button>
+        <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm" data-confirm="Delete ticket #<%= ticketID %>?" aria-label="Delete"><svg class="ico"><use href="#i-trash"/></svg></button>
+      </div>
     </form>
-  </tr>
+<%
+    }
+    if (!any) {
+%>
+    <div class="empty">
+      <h3>No strips on the board</h3>
+      <p>This customer doesn't hold any tickets yet.</p>
+      <a class="btn" href="makeReservation.jsp?cid=<%= esc(selectedCID) %>" style="margin-top:10px"><svg class="ico"><use href="#i-plus"/></svg> Make a reservation</a>
+    </div>
 <%
     }
 %>
-</table>
+  </div>
 <%
   }
+} else {
+%>
+  <div class="empty reveal reveal-3">
+    <h3>Select a customer</h3>
+    <p>Their tickets will appear here as flight strips you can amend.</p>
+  </div>
+<%
 }
 %>
+</main>
 
+<jsp:include page="/WEB-INF/jspf/foot.jsp"/>
 </body>
 </html>
