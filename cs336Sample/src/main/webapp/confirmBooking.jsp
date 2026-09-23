@@ -1,6 +1,7 @@
 <%@ page import="java.sql.*,java.math.BigDecimal,javax.servlet.http.*" %>
 <%@ page import="com.cs336.pkg.ApplicationDB" %>
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/jspf/util.jspf" %>
 
 <%
   if (session == null || session.getAttribute("userEmail") == null) {
@@ -160,25 +161,84 @@
     if (reason == null) reason = "Error: " + err.getMessage();
   }
 
-  if (reason == null && !waitlisted) {
-%>
-  <h3>🎉 Booking confirmed!</h3>
-<%
-  } else if (waitlisted) {
-%>
-  <h3>✈️ Flight Full — You've been waitlisted.</h3>
-  <p>We'll notify you if a seat becomes available.</p>
-<%
-  } else {
-%>
-  <h3>⚠️ Booking failed:</h3>
-  <p><%= reason %></p>
-<%
+  String[] fl = null;
+  Timestamp flDep = null, flArr = null;
+  try (Connection conn = db.getConnection();
+       PreparedStatement ps = conn.prepareStatement(
+         "SELECT f.airlineID, a.name AS airline, f.flightNum, f.departureTime, f.arrivalTime, " +
+         "ap1.airportID AS depCode, ap1.city AS depCity, ap2.airportID AS arrCode, ap2.city AS arrCity " +
+         "FROM FLIGHT f JOIN AIRLINE a ON f.airlineID = a.airlineID " +
+         "JOIN AIRPORT ap1 ON f.DepartureAirportID = ap1.airportID " +
+         "JOIN AIRPORT ap2 ON f.ArrivalAirportID = ap2.airportID WHERE f.flightID = ?")) {
+    ps.setInt(1, flightID);
+    ResultSet rs = ps.executeQuery();
+    if (rs.next()) {
+      fl = new String[] { rs.getString("airlineID"), rs.getString("airline"), rs.getString("flightNum"),
+                          rs.getString("depCode"), rs.getString("depCity"), rs.getString("arrCode"), rs.getString("arrCity") };
+      flDep = rs.getTimestamp("departureTime");
+      flArr = rs.getTimestamp("arrivalTime");
+    }
+  } catch (Exception ignored) {
   }
-%>
 
-<p>
-  <a href="viewReservations.jsp">→ My Reservations</a> |
-  <a href="searchFlights.jsp">← Search Flights</a> |
-  <a href="logout.jsp">Logout</a>
-</p>
+  boolean confirmed = reason == null && !waitlisted;
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<jsp:include page="/WEB-INF/jspf/head.jsp"><jsp:param name="title" value="Booking status"/></jsp:include>
+</head>
+<body>
+<jsp:include page="/WEB-INF/jspf/nav.jsp"><jsp:param name="role" value="customer"/><jsp:param name="active" value="trips"/></jsp:include>
+
+<main class="shell">
+  <section class="result-hero">
+<% if (confirmed) { %>
+    <div class="stamp is-go is-round stamp-in">Confirmed<small>Contrail &middot; T1</small></div>
+    <h1>You're on the <em>manifest.</em></h1>
+    <p class="lede">Your seat is locked in. Keep this boarding pass handy &mdash; it's also waiting under My trips.</p>
+<% } else if (waitlisted) { %>
+    <div class="stamp is-sand is-round stamp-in">Waitlist<small>Standby</small></div>
+    <h1>Flight full &mdash; you're on <em>standby.</em></h1>
+    <p class="lede">We'll notify you in the lounge if a seat becomes available on this flight.</p>
+<% } else { %>
+    <div class="stamp is-stamp is-round stamp-in">Denied<small>Gate agent</small></div>
+    <h1>We couldn't <em>book</em> that seat.</h1>
+    <p class="lede"><%= esc(reason) %></p>
+<% } %>
+  </section>
+
+<% if (fl != null) { %>
+  <article class="ticket reveal reveal-2" style="max-width:900px; margin:0 auto">
+    <div class="ticket-main">
+      <div class="ticket-top">
+        <%= carrierHtml(fl[0], fl[1], "Flight " + esc(fl[0]) + " " + esc(fl[2])) %>
+        <span class="pill <%= confirmed ? "pill-go" : waitlisted ? "pill-sand" : "pill-stamp" %>"><%= confirmed ? "Confirmed" : waitlisted ? "Waitlisted" : "Not booked" %></span>
+      </div>
+      <%= routeHtml(fl[3], fl[4], flDep, fl[5], fl[6], flArr) %>
+      <div class="ticket-meta">
+        <div class="meta-item"><span class="label">Passenger</span><span class="val"><%= esc(firstName) %> <%= esc(lastName) %></span></div>
+        <div class="meta-item"><span class="label">Class</span><span class="val"><%= esc(cls) %></span></div>
+        <div class="meta-item"><span class="label">Seat</span><span class="val"><%= confirmed ? esc(seat) : "--" %></span></div>
+        <div class="meta-item"><span class="label">Refund</span><span class="val"><%= cancellable ? "Yes" : "No" %></span></div>
+      </div>
+    </div>
+    <div class="ticket-stub">
+      <div>
+        <span class="label">Total paid</span>
+        <div class="price"><%= confirmed ? money(totalFare.add(bookingFee).doubleValue()) : "$0.00" %><small>Fare <%= money(totalFare.doubleValue()) %> + fee <%= money(bookingFee.doubleValue()) %></small></div>
+      </div>
+      <div class="barcode"></div>
+    </div>
+  </article>
+<% } %>
+
+  <div class="btn-row reveal reveal-3" style="justify-content:center; margin-top:34px">
+    <a class="btn" href="viewReservations.jsp"><svg class="ico"><use href="#i-luggage"/></svg> My trips</a>
+    <a class="btn btn-ghost" href="searchFlights.jsp"><svg class="ico"><use href="#i-search"/></svg> Search flights</a>
+  </div>
+</main>
+
+<jsp:include page="/WEB-INF/jspf/foot.jsp"/>
+</body>
+</html>

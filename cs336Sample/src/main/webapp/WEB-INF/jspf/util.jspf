@@ -1,0 +1,76 @@
+<%!
+  private static String esc(Object value) {
+    if (value == null) return "";
+    String s = value.toString();
+    StringBuilder b = new StringBuilder(s.length() + 16);
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      switch (c) {
+        case '<': b.append("&lt;"); break;
+        case '>': b.append("&gt;"); break;
+        case '&': b.append("&amp;"); break;
+        case '"': b.append("&quot;"); break;
+        case '\'': b.append("&#39;"); break;
+        default: b.append(c);
+      }
+    }
+    return b.toString();
+  }
+
+  private static String fmtTime(java.util.Date d) {
+    return d == null ? "--:--" : new java.text.SimpleDateFormat("HH:mm").format(d);
+  }
+
+  private static String fmtDate(java.util.Date d) {
+    return d == null ? "" : new java.text.SimpleDateFormat("EEE, MMM d", java.util.Locale.US).format(d);
+  }
+
+  private static String fmtDateTime(java.util.Date d) {
+    return d == null ? "" : new java.text.SimpleDateFormat("MMM d, yyyy 'at' HH:mm", java.util.Locale.US).format(d);
+  }
+
+  private static String fmtDur(long minutes) {
+    if (minutes <= 0) return "--";
+    return (minutes / 60) + "h " + String.format("%02d", minutes % 60) + "m";
+  }
+
+  private static long minutesBetween(java.util.Date a, java.util.Date b) {
+    if (a == null || b == null) return 0;
+    return (b.getTime() - a.getTime()) / 60000L;
+  }
+
+  private static String money(double v) {
+    return String.format(java.util.Locale.US, "$%,.2f", v);
+  }
+
+  private static String initials(String first, String last) {
+    String f = first == null || first.isEmpty() ? "" : first.substring(0, 1);
+    String l = last == null || last.isEmpty() ? "" : last.substring(0, 1);
+    return (f + l).toUpperCase();
+  }
+
+  private static String carrierHtml(String code, String name, String sub) {
+    String badge = code == null ? "" : code.length() > 3 ? code.substring(0, 3) : code;
+    return "<div class=\"carrier\"><span class=\"carrier-badge\">" + esc(badge) + "</span><div>"
+         + "<div class=\"carrier-name\">" + esc(name) + "</div>"
+         + "<div class=\"carrier-sub\">" + sub + "</div></div></div>";
+  }
+
+  private static String routeHtml(String depCode, String depCity, java.util.Date dep,
+                                  String arrCode, String arrCity, java.util.Date arr) {
+    return "<div class=\"route\">"
+         + "<div class=\"end\"><div class=\"code\">" + esc(depCode) + "</div>"
+         + "<div class=\"city\">" + esc(depCity) + "</div>"
+         + "<div class=\"time\">" + fmtTime(dep) + "</div>"
+         + "<div class=\"date\">" + fmtDate(dep) + "</div></div>"
+         + "<div class=\"arc\" aria-hidden=\"true\">"
+         + "<svg viewBox=\"0 0 100 40\" preserveAspectRatio=\"none\"><path d=\"M2 36 Q50 -8 98 36\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-dasharray=\"2 5\" vector-effect=\"non-scaling-stroke\"/></svg>"
+         + "<svg class=\"plane\" viewBox=\"0 0 24 24\"><use href=\"#i-plane\"/></svg>"
+         + "<span class=\"dur\">" + fmtDur(minutesBetween(dep, arr)) + "</span></div>"
+         + "<div class=\"end is-arr\"><div class=\"code\">" + esc(arrCode) + "</div>"
+         + "<div class=\"city\">" + esc(arrCity) + "</div>"
+         + "<div class=\"time\">" + fmtTime(arr) + "</div>"
+         + "<div class=\"date\">" + fmtDate(arr) + "</div></div>"
+         + "</div>";
+  }
+%>

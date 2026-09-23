@@ -1,7 +1,7 @@
 <%@ page session="true" import="java.sql.*" %>
 <%@ page import="java.util.Set, java.util.HashSet" %>
 <%@ page import="com.cs336.pkg.ApplicationDB" %>
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <%
   String email = (String) session.getAttribute("userEmail");
@@ -81,42 +81,43 @@
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Cancel Reservation</title>
-  <style>
-    body { font-family: sans-serif; }
-    .topbar { text-align:right; margin-bottom:1em; }
-  </style>
+<jsp:include page="/WEB-INF/jspf/head.jsp"><jsp:param name="title" value="Cancel reservation"/></jsp:include>
 </head>
 <body>
+<jsp:include page="/WEB-INF/jspf/nav.jsp"><jsp:param name="role" value="customer"/><jsp:param name="active" value="trips"/></jsp:include>
 
-<div class="topbar">
-  Logged in as <strong><%= email %></strong> |
-  <a href="logout.jsp">Logout</a>
-</div>
-
-<h2>Cancel Reservation</h2>
-
+<main class="shell">
+  <section class="result-hero">
 <%
   if (!valid) {
 %>
-  <p style="color:red;">Reservation not found or not authorized.</p>
+    <div class="stamp is-stamp is-round stamp-in">Void<small>Not found</small></div>
+    <h1>We couldn't find that <em>ticket.</em></h1>
+    <p class="lede">Reservation not found or not authorized for this account.</p>
 <%
   } else if (deleted) {
 %>
-  <p>Your reservation has been <strong>cancelled</strong>.</p>
-  <p style="color:green;">Waitlisted users in this session will be notified.</p>
+    <div class="stamp is-round stamp-in">Cancelled<small>Ticket #<%= ticketID.replaceAll("[^0-9]", "") %></small></div>
+    <h1>Your reservation has been <em>cancelled.</em></h1>
+    <p class="lede">The seat is back on the board. Waitlisted passengers in this session will be notified.</p>
 <%
   } else {
 %>
-  <p style="color:red;">Could not cancel this reservation.</p>
+    <div class="stamp is-stamp is-round stamp-in">Hold<small>Try again</small></div>
+    <h1>Could not cancel this <em>reservation.</em></h1>
+    <p class="lede">Something went wrong at the gate. Please try again in a moment.</p>
 <%
   }
 %>
+    <div class="btn-row">
+      <a class="btn" href="viewReservations.jsp"><svg class="ico"><use href="#i-back"/></svg> Back to my trips</a>
+      <a class="btn btn-ghost" href="searchFlights.jsp"><svg class="ico"><use href="#i-search"/></svg> Search flights</a>
+    </div>
+  </section>
+</main>
 
-<p><a href="viewReservations.jsp">← Back to Reservations</a></p>
-
+<jsp:include page="/WEB-INF/jspf/foot.jsp"/>
 </body>
 </html>
