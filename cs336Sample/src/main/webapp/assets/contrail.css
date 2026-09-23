@@ -1278,7 +1278,8 @@ details.prefs .prefs-body { padding: 0 28px 24px; display: grid; grid-template-c
   .gate-row .gr-status { display: none; }
   .cabin { gap: 14px; padding: 22px 14px; }
   .porthole { width: 78px; }
-  .luggage .who { max-width: 110px; }
+  .topbar .luggage { display: none; }
+  .topbar .icon-btn { margin-left: auto; }
   .qa { grid-template-columns: 1fr; gap: 8px; }
   .board { padding: 16px 14px; }
   .board .hide-sm { display: none; }

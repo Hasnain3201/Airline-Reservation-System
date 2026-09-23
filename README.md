@@ -45,7 +45,7 @@ Airline Reservation System is a traditional JSP web application for searching fl
 | Server | Apache Tomcat 9 recommended |
 | Database | MySQL |
 | Driver | MySQL Connector/J in `WEB-INF/lib` |
-| UI | JSP, HTML, light inline CSS |
+| UI | JSP, HTML, shared "Contrail" design system (`assets/contrail.css`, `assets/contrail.js`, `WEB-INF/jspf/`) |
 
 ## Project Structure
 
@@ -79,6 +79,8 @@ Airline Reservation System is a traditional JSP web application for searching fl
 
 ```bash
 mysql -u root -p < database/schema.sql
+# optional: extra airports, future flights, tickets and questions for a fuller demo
+mysql -u root -p < database/demo_data.sql
 ```
 
 Demo accounts included in the schema:
