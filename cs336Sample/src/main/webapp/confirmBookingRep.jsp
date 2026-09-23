@@ -1,6 +1,7 @@
 <%@ page import="java.sql.*,java.math.BigDecimal,javax.servlet.http.*" %>
 <%@ page import="com.cs336.pkg.ApplicationDB" %>
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/jspf/util.jspf" %>
 
 <%
   HttpSession s = request.getSession(false);
@@ -89,33 +90,31 @@
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Confirm Booking (Rep)</title>
+<jsp:include page="/WEB-INF/jspf/head.jsp"><jsp:param name="title" value="Reservation result"/></jsp:include>
 </head>
 <body>
+<jsp:include page="/WEB-INF/jspf/nav.jsp"><jsp:param name="role" value="rep"/><jsp:param name="active" value="make"/></jsp:include>
 
-<div style="text-align:right;">
-  Logged in as <strong><%= repEmail %></strong> |
-  <a href="logout.jsp">Logout</a>
-</div>
+<main class="shell">
+  <section class="result-hero">
+<% if (confirmed) { %>
+    <div class="stamp is-go is-round stamp-in">Issued<small>Ops desk &middot; B3</small></div>
+    <h1>Reservation <em>confirmed.</em></h1>
+    <p class="lede"><%= esc(cls) %> seat <%= esc(seat) %> on flight #<%= flightID %> is booked for customer #<%= cid %>. Total charged: <%= money(totalFare.add(bookingFee).doubleValue()) %><%= cancellable ? " (cancellable)" : " (non-refundable)" %>.</p>
+<% } else { %>
+    <div class="stamp is-stamp is-round stamp-in">Denied<small>Ops desk &middot; B3</small></div>
+    <h1>Reservation <em>failed.</em></h1>
+    <p class="lede"><%= esc(reason) %></p>
+<% } %>
+    <div class="btn-row">
+      <a class="btn" href="makeReservation.jsp?cid=<%= cid %>&amp;flightID=<%= flightID %>"><svg class="ico"><use href="#i-back"/></svg> Back to reservation page</a>
+      <a class="btn btn-ghost" href="editReservation.jsp?cid=<%= cid %>"><svg class="ico"><use href="#i-edit"/></svg> View customer's tickets</a>
+    </div>
+  </section>
+</main>
 
-<h2>Reservation Result</h2>
-
-<%
-  if (confirmed) {
-%>
-  <p style="color:green;"><strong>🎉 Reservation confirmed!</strong></p>
-<%
-  } else {
-%>
-  <p style="color:red;"><strong>⚠️ Reservation failed:</strong><br/><%= reason %></p>
-<%
-  }
-%>
-
-<p><a href="makeReservation.jsp">← Back to Reservation Page</a></p>
-
+<jsp:include page="/WEB-INF/jspf/foot.jsp"/>
 </body>
 </html>

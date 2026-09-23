@@ -57,7 +57,7 @@
       <span class="brand-word">Contrail<small>Terminal&nbsp;1</small></span>
     </a>
 
-    <nav class="wayfinder" aria-label="Primary">
+    <nav class="wayfinder<%= items.length > 5 ? " is-dense" : "" %>" aria-label="Primary">
 <% for (String[] it : items) { %>
       <a href="<%= it[1] %>" class="<%= it[0].equals(navActive) ? "is-active" : "" %>"<%= it[0].equals(navActive) ? " aria-current=\"page\"" : "" %>>
         <svg class="ico"><use href="#<%= it[2] %>"/></svg>

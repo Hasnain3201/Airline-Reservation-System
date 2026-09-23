@@ -190,6 +190,8 @@ main.shell { padding: 8px 0 72px; }
   padding: 1px 5px; border-radius: 4px;
   background: rgba(28,46,64,.07); color: var(--ink-soft);
 }
+.wayfinder.is-dense a { padding: 8px 11px; }
+@media (max-width: 1600px) { .wayfinder.is-dense .gate-no { display: none; } }
 .wayfinder a.is-active .gate-no { background: rgba(255,255,255,.14); color: var(--sky-100); }
 
 /* Luggage tag (user chip) */
@@ -669,6 +671,7 @@ table.manifest { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .manifest .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
 .manifest .right { text-align: right; }
 .manifest td input, .manifest td select { padding: 8px 10px; font-size: .86rem; border-radius: 9px; }
+.manifest td select { min-width: 92px; padding-right: 30px; background-position: right 6px center; }
 .manifest tr.add-row td { background: var(--sky-25); border-top: 1px solid var(--sky-200); }
 .manifest tfoot td, .manifest tfoot th { padding: 14px 16px; background: var(--sand-50); border-top: 1px solid var(--sand-200); font-weight: 600; }
 .manifest .empty-cell { text-align: center; padding: 36px 16px; color: var(--ink-soft); }
@@ -713,6 +716,8 @@ table.manifest { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .strip .v { font-family: var(--f-mono); font-weight: 600; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .strip .v.big { font-family: var(--f-display); font-weight: 500; font-size: 1.35rem; letter-spacing: -.01em; }
 .strip .strip-act { display: flex; align-items: center; gap: 8px; }
+.strip select, .strip input { padding: 7px 30px 7px 10px; font-size: .86rem; border-radius: 8px; background-color: rgba(255,255,255,.7); }
+.strip.is-ink .strip-tab { letter-spacing: .12em; }
 
 /* ------------------------------------------------------------------------
    Stats
