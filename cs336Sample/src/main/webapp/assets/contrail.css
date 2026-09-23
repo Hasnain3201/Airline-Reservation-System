@@ -907,7 +907,7 @@ body.is-login {
 }
 @keyframes passIn { from { transform: translateY(24px) rotate(1.5deg); opacity: 0; } to { transform: none; opacity: 1; } }
 .pass-band {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
   padding: 16px 26px;
   background: var(--ink); color: var(--flap);
   border-radius: 26px 26px 0 0;
@@ -1283,6 +1283,8 @@ details.prefs .prefs-body { padding: 0 28px 24px; display: grid; grid-template-c
   .qa { grid-template-columns: 1fr; gap: 8px; }
   .board { padding: 16px 14px; }
   .board .hide-sm { display: none; }
+  .pass-band { padding: 14px 20px; letter-spacing: .16em; }
+  .pass-band > span:last-child { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
