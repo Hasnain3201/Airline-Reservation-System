@@ -1,7 +1,7 @@
 <%@ page import="java.sql.*, java.util.*" %>
 <%@ page import="com.cs336.pkg.ApplicationDB" %>
-<%@ page contentType="text/html; charset=UTF-8" %>
-
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/jspf/util.jspf" %>
 <%
   String email = (String) session.getAttribute("userEmail");
   if (email == null) {
@@ -14,48 +14,36 @@
 
   ApplicationDB db = new ApplicationDB();
 %>
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Browse Q&A</title>
-  <style>
-    body { font-family: sans-serif; margin: 2em; }
-    .topbar { text-align: right; margin-bottom: 1em; }
-    .topbar a { margin-left: 1em; }
-    table { border-collapse: collapse; width: 100%; margin-top: 1em; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #eee; }
-    form { margin-top: 1em; }
-  </style>
+<jsp:include page="/WEB-INF/jspf/head.jsp"><jsp:param name="title" value="Information desk"/></jsp:include>
 </head>
 <body>
+<jsp:include page="/WEB-INF/jspf/nav.jsp"><jsp:param name="role" value="customer"/><jsp:param name="active" value="qna"/></jsp:include>
 
-<div class="topbar">
-  Logged in as <strong><%= email %></strong> |
-  <a href="customerHome.jsp">🏠 HomePage</a> |
-  <a href="searchFlights.jsp">Search Flights</a> |
-  <a href="viewReservations.jsp">My Reservations</a> |
-  <a href="logout.jsp">Logout</a>
-</div>
+<main class="shell">
+  <header class="page-head reveal">
+    <div>
+      <div class="eyebrow"><span class="gate-sign">A9</span> Concourse A &middot; Information desk</div>
+      <h1>Ask the <em>crew.</em></h1>
+      <p class="lede">Questions from fellow travellers, answered by our representatives. Can't find yours? Leave a note at the desk.</p>
+    </div>
+    <div class="head-actions">
+      <a class="btn" href="postQuestion.jsp"><svg class="ico"><use href="#i-chat"/></svg> Ask a question</a>
+    </div>
+  </header>
 
-<h2>Customer Q&A</h2>
+  <form method="get" action="browseQnA.jsp" class="searchbar reveal reveal-2" style="margin-bottom:28px">
+    <svg class="ico"><use href="#i-search"/></svg>
+    <input type="text" name="search" value="<%= esc(search) %>" placeholder="Search questions and answers&hellip; baggage, seats, waitlist" aria-label="Search Q&amp;A" />
+<% if (filtered) { %>
+    <a class="btn btn-ghost btn-sm" href="browseQnA.jsp">Clear</a>
+<% } %>
+    <button type="submit" class="btn btn-sm">Search</button>
+  </form>
 
-<form method="get" action="browseQnA.jsp">
-  <label>Search Q/A: <input type="text" name="search" value="<%= search != null ? search : "" %>" /></label>
-  <button type="submit">Search</button>
-  <a href="browseQnA.jsp">Clear</a>
-</form>
-
-<table>
-  <tr>
-    <th>ID</th>
-    <th>Question</th>
-    <th>Answer</th>
-    <th>Asked On</th>
-  </tr>
-
+  <div class="qa-list reveal reveal-3">
 <%
   String query = "SELECT questionID, qtext, atext, qdate FROM QUESTION";
   if (filtered) {
@@ -74,29 +62,43 @@
     boolean any = false;
     while (rs.next()) {
       any = true;
+      String answer = rs.getString("atext");
 %>
-  <tr>
-    <td><%= rs.getInt("questionID") %></td>
-    <td><%= rs.getString("qtext") %></td>
-    <td><%= rs.getString("atext") != null ? rs.getString("atext") : "<em>Unanswered</em>" %></td>
-    <td><%= rs.getTimestamp("qdate") %></td>
-  </tr>
+    <article class="qa">
+      <div class="qa-no"><%= String.format("%02d", rs.getInt("questionID")) %><small>Query</small></div>
+      <div>
+        <div class="qa-q"><%= esc(rs.getString("qtext")) %></div>
+<% if (answer != null) { %>
+        <div class="qa-a"><svg class="ico"><use href="#i-chat"/></svg><%= esc(answer) %></div>
+<% } else { %>
+        <div class="qa-a is-open"><svg class="ico"><use href="#i-hourglass"/></svg>Awaiting a reply from the crew&hellip;</div>
+<% } %>
+        <div class="qa-meta">
+          <span class="caps">Asked <%= fmtDateTime(rs.getTimestamp("qdate")) %></span>
+          <span class="pill <%= answer != null ? "pill-go" : "pill-sand" %>"><%= answer != null ? "Answered" : "Unanswered" %></span>
+        </div>
+      </div>
+    </article>
 <%
     }
     if (!any) {
 %>
-  <tr><td colspan="4" style="text-align:center;"><em>No Q&A posts found.</em></td></tr>
+    <div class="empty">
+      <h3>No notes at the desk</h3>
+      <p><%= filtered ? "Nothing matches \"" + esc(search) + "\". Try another word, or ask the crew directly." : "No Q&amp;A posts yet. Be the first to ask." %></p>
+      <a class="btn" href="postQuestion.jsp" style="margin-top:10px"><svg class="ico"><use href="#i-chat"/></svg> Ask a question</a>
+    </div>
 <%
     }
   } catch (Exception err) {
 %>
-  <tr><td colspan="4" style="color:red;text-align:center;">Failed to load Q&A</td></tr>
+    <div class="announce is-stamp"><svg class="ico"><use href="#i-megaphone"/></svg><div><strong>Desk closed</strong><p>Failed to load Q&amp;A.</p></div></div>
 <%
   }
 %>
-</table>
+  </div>
+</main>
 
-<p><a href="postQuestion.jsp">✍️ Ask a New Question</a></p>
-
+<jsp:include page="/WEB-INF/jspf/foot.jsp"/>
 </body>
 </html>

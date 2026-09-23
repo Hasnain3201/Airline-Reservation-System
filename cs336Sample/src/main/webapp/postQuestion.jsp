@@ -1,6 +1,7 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="com.cs336.pkg.ApplicationDB" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/jspf/util.jspf" %>
 
 <%
   String email = (String) session.getAttribute("userEmail");
@@ -52,37 +53,53 @@
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Ask a Question</title>
-  <style>
-    body { font-family: sans-serif; margin: 2em; }
-    .topbar { text-align: right; margin-bottom: 1em; }
-    textarea { width: 100%; height: 120px; }
-    form { margin-top: 1em; }
-  </style>
+<jsp:include page="/WEB-INF/jspf/head.jsp"><jsp:param name="title" value="Ask a question"/></jsp:include>
 </head>
 <body>
+<jsp:include page="/WEB-INF/jspf/nav.jsp"><jsp:param name="role" value="customer"/><jsp:param name="active" value="qna"/></jsp:include>
 
-<div class="topbar">
-  Logged in as <strong><%= email %></strong> |
-  <a href="customerHome.jsp">🏠 HomePage</a> |
-  <a href="browseQnA.jsp">Browse Q&A</a> |
-  <a href="logout.jsp">Logout</a>
-</div>
-
-<h2>Post a Question</h2>
+<main class="shell">
+  <header class="page-head reveal">
+    <div>
+      <div class="eyebrow"><span class="gate-sign">A10</span> Concourse A &middot; Information desk</div>
+      <h1>Leave a note for the <em>crew.</em></h1>
+      <p class="lede">Baggage, seats, waitlists, lounges &mdash; ask anything. A representative will answer and it'll appear on the information desk for everyone.</p>
+    </div>
+  </header>
 
 <% if (message != null) { %>
-  <p style="color:red;"><%= message %></p>
+  <div class="announce is-stamp"><svg class="ico"><use href="#i-megaphone"/></svg><div><strong>Not sent</strong><p><%= esc(message) %></p></div></div>
 <% } %>
 
-<form method="post" action="postQuestion.jsp">
-  <label for="question">Your Question:</label><br/>
-  <textarea name="question" required></textarea><br/>
-  <button type="submit">Submit</button>
-</form>
+  <div class="grid grid-aside">
+    <form method="post" action="postQuestion.jsp" class="card reveal reveal-2" style="padding:0; overflow:hidden">
+      <div class="pass-band" style="border-radius:0">
+        <span><svg class="ico"><use href="#i-chat"/></svg>&nbsp; Postcard to the desk</span>
+        <span>Par avion</span>
+      </div>
+      <div style="padding:26px">
+        <div class="field">
+          <label for="question">Your question</label>
+          <textarea name="question" id="question" required placeholder="Dear crew, I was wondering&hellip;"></textarea>
+        </div>
+        <div class="btn-row" style="margin-top:18px; justify-content:space-between">
+          <span class="caps">From: <%= esc(email) %></span>
+          <button type="submit" class="btn">Send to the desk <svg class="ico ico-go"><use href="#i-arrow"/></svg></button>
+        </div>
+      </div>
+    </form>
 
+    <aside class="card card-sky reveal reveal-3">
+      <div class="card-head"><h3><svg class="ico"><use href="#i-info"/></svg> Before you ask</h3></div>
+      <p class="muted">Many questions have already been answered by our representatives.</p>
+      <div class="stamp is-sand" style="margin:10px 0 22px">Airmail<small>Answered in hours</small></div>
+      <div><a class="btn btn-ghost" href="browseQnA.jsp"><svg class="ico"><use href="#i-search"/></svg> Browse the desk</a></div>
+    </aside>
+  </div>
+</main>
+
+<jsp:include page="/WEB-INF/jspf/foot.jsp"/>
 </body>
 </html>
