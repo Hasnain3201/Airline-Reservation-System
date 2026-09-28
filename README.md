@@ -2,7 +2,7 @@
 
 <img src="docs/screenshots/01-login.png" alt="Contrail check-in page with a route map, boarding-pass sign-in and split-flap departures board" width="100%">
 
-# Contrail — Airline Reservation System
+# Contrail: Airline Reservation System
 
 **Every journey begins at the gate.**
 
@@ -29,9 +29,9 @@ wrapped in a hand-crafted airport-terminal interface of boarding passes, split-f
 
 ## Overview
 
-Contrail is a traditional server-rendered JSP application: customers search and book flights, representatives run the operations desk, and administrators watch the whole network from the control tower. Everything talks to MySQL over JDBC, and every page is rendered by Tomcat — there is no front-end build step, framework or package manager.
+Contrail is a traditional server-rendered JSP application: customers search and book flights, representatives run the operations desk, and administrators watch the whole network from the control tower. Everything talks to MySQL over JDBC, and every page is rendered by Tomcat; there is no front-end build step, framework or package manager.
 
-The interface is built around one idea: **the app should feel like walking through a quiet, sunlit airport terminal**. Instead of generic cards and dashboards, each screen borrows a real object from air travel — a boarding pass, a departures board, a luggage tag, an air-traffic-control flight strip — and turns it into UI.
+The interface is built around one idea: **the app should feel like walking through a quiet, sunlit airport terminal**. Instead of generic cards and dashboards, each screen borrows a real object from air travel, such as a boarding pass, a departures board, a luggage tag or an air-traffic-control flight strip, then turns it into UI.
 
 | | |
 | --- | --- |
@@ -118,7 +118,7 @@ Motion is small and purposeful: split-flap letters settle one tile at a time, pl
     <td><img src="docs/screenshots/07-my-trips.png" alt="My trips"></td>
   </tr>
   <tr>
-    <td><b>A5 · Confirmation</b><br>A passport stamp lands on the page — <code>CONFIRMED</code>, <code>WAITLIST</code> or <code>DENIED</code> — above your printed boarding pass.</td>
+    <td><b>A5 · Confirmation</b><br>A passport stamp lands on the page: <code>CONFIRMED</code>, <code>WAITLIST</code> or <code>DENIED</code>, above your printed boarding pass.</td>
     <td><b>A6 · My trips</b><br>Upcoming boarding passes with refund status and cancel actions; flown trips fade out and get an <code>ARRIVED</code> stamp.</td>
   </tr>
   <tr>
@@ -188,7 +188,7 @@ The whole terminal is responsive. Navigation becomes a swipeable sign strip, tic
 ## Features by role
 
 <details open>
-<summary><b>Passengers</b> — Concourse A</summary>
+<summary><b>Passengers</b> | Concourse A</summary>
 
 - Sign in (or tap a demo luggage tag to autofill credentials).
 - Search one-way or round-trip flights by origin, destination, date (with ±3 flexible days), airline, take-off and landing windows, and sort order.
@@ -202,7 +202,7 @@ The whole terminal is responsive. Navigation becomes a swipeable sign strip, tic
 </details>
 
 <details>
-<summary><b>Customer representatives</b> — Concourse B</summary>
+<summary><b>Customer representatives</b> | Concourse B</summary>
 
 - Live desk overview: open questions, waitlist size, upcoming flights, tickets issued.
 - Book flights on behalf of any customer, using their saved passengers and the cabin seat map.
@@ -215,7 +215,7 @@ The whole terminal is responsive. Navigation becomes a swipeable sign strip, tic
 </details>
 
 <details>
-<summary><b>Administrators</b> — Concourse C</summary>
+<summary><b>Administrators</b> | Concourse C</summary>
 
 - Network overview: total revenue, tickets, customers, representatives and flights, plus revenue by cabin.
 - Manage customers and representatives (add, edit, delete).
@@ -264,9 +264,9 @@ export DB_PASSWORD="your_mysql_password"
 
 ### 3. Deploy
 
-**Option A — IDE.** Import `cs336Sample` as a Dynamic Web Project in Eclipse or IntelliJ IDEA, attach it to Tomcat 9 and start the server.
+**Option A: IDE.** Import `cs336Sample` as a Dynamic Web Project in Eclipse or IntelliJ IDEA, attach it to Tomcat 9 and start the server.
 
-**Option B — command line.** Build an exploded webapp and drop it into Tomcat:
+**Option B: command line.** Build an exploded webapp and drop it into Tomcat:
 
 ```bash
 APP=$CATALINA_HOME/webapps/cs336Sample
@@ -415,7 +415,7 @@ A typical page looks like this:
 | Database connection fails | Confirm MySQL is running and `DB_URL`, `DB_USER` and `DB_PASSWORD` match your setup. |
 | `Public Key Retrieval is not allowed` or auth errors on MySQL 8 | Add `allowPublicKeyRetrieval=true` to `DB_URL`, or create a user with `IDENTIFIED WITH mysql_native_password` (the bundled Connector/J is 5.1.x). |
 | Login fails | Load `database/schema.sql` and use one of the demo accounts above. The login page will say so if the database is unreachable. |
-| The departures board says "temporarily unavailable" | The login page couldn't query flights — check the database connection. |
+| The departures board says "temporarily unavailable" | The login page couldn't query flights. Check the database connection. |
 | Few flights or empty "upcoming" lists | The base seed flights are in July 2026; load `database/demo_data.sql` for future flights. |
 | Fonts look plain | Headline and mono fonts load from Google Fonts; offline, the app falls back to system serif and monospace fonts. |
 | MySQL driver missing | Keep the connector JAR in `WEB-INF/lib`. |
